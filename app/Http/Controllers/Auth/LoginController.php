@@ -22,13 +22,46 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        // 🔹 Cek dulu apakah user ada di lokal (pembimbing/mitra)
+        $localUser = User::where('username', $request->username)->first();
+
+        if ($localUser && in_array($localUser->role, ['pembimbing', 'mitra'])) {
+            // ✅ Gunakan login lokal tanpa SSO
+            if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+                session([
+                    'user' => [
+                        'username' => $localUser->username,
+                        'name'     => $localUser->name,
+                        'email'    => $localUser->email,
+                        'role'     => $localUser->role,
+                    ],
+                ]);
+
+                return match ($localUser->role) {
+                    'pembimbing' => redirect()->intended('/user'),
+                    'mitra' => redirect()->intended('/user'),
+                    default => redirect()->intended('/user'),
+                };
+            }
+
+            return back()->withErrors([
+                'username' => 'Username atau password salah.',
+            ]);
+        }
+
+        // 🔹 Kalau bukan pembimbing/mitra, gunakan SSO
+        return $this->loginViaSSO($request);
+    }
+
+    private function loginViaSSO(Request $request)
+    {
         $ssoUrl = rtrim(env('SSO_URL'), '/');
         $apiKey = env('SSO_API_KEY');
         $appName = env('SSO_APP_NAME');
 
         try {
             $response = Http::withHeaders([
-                'x-api-key' => $apiKey, // ✅ FIX: gunakan header yang benar
+                'x-api-key' => $apiKey,
                 'Accept'    => 'application/json',
             ])->post($ssoUrl, [
                 'username' => $request->username,
@@ -36,7 +69,6 @@ class LoginController extends Controller
                 'app_name' => $appName,
             ]);
 
-            // Debug log agar mudah dilacak jika masih error
             \Log::debug('🔹 SSO Debug Info', [
                 'url_dikirim' => $ssoUrl,
                 'header' => ['x-api-key' => $apiKey],
@@ -114,7 +146,7 @@ class LoginController extends Controller
 
         return match ($role) {
             'superadmin-logbook' => redirect()->intended('/user'),
-            'dosen' => redirect()->intended('/dosen'),
+            'dosen' => redirect()->intended('/user'),
             default => redirect()->intended('/user'),
         };
     }

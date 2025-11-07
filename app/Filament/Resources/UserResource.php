@@ -53,7 +53,6 @@ class UserResource extends Resource
                     ->label('Role')
                     ->options([
                         'superadmin-logbook' => 'Superadmin Logbook',
-                        'admin'              => 'Admin',
                         'dosen'              => 'Dosen',
                         'mahasiswa'          => 'Mahasiswa',
                         'mitra'              => 'Mitra',
