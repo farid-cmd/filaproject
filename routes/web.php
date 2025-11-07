@@ -12,19 +12,10 @@ Route::post('/login', [LoginController::class, 'login']);
 // 🔹 Proses logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// 🔹 Halaman utama setelah login
-Route::get('/dashboard', function () {
-    if (!session('logged_in')) {
-        return redirect('/login');
-    }
-    return view('dashboard');
-})->name('dashboard');
 
-// 🔹 Halaman default Laravel
 Route::get('/', function () {
     return redirect('/login');
 });
-
 
 
 Route::get('/logbooks/print/{id}', [LogbookPrintController::class, 'print'])
