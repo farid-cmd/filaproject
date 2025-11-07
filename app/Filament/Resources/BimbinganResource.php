@@ -6,7 +6,7 @@ use App\Filament\Resources\BimbinganResource\Pages;
 use App\Models\Bimbingan;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
-use App\Models\MitraMagang;
+use App\Models\Mitra;
 use App\Models\PembimbingLapangan;
 use Filament\Forms;
 use Filament\Forms\Form;
