@@ -9,55 +9,67 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class DosenResource extends Resource
 {
     protected static ?string $model = Dosen::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationLabel = 'Dosen';
-    protected static ?string $navigationGroup = 'Data Akademik';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Data Master';
+
+    // Boleh diakses oleh superadmin dan dosen
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return in_array($user->role, ['superadmin-logbook', 'dosen']);
+    }
 
     public static function form(Form $form): Form
     {
-        return $form->schema([
-            Forms\Components\Select::make('user_id')
-                ->label('User')
-                ->relationship('user', 'name')
-                ->searchable()
-                ->required(),
-
-            Forms\Components\TextInput::make('nip')
-                ->label('NIP')
-                ->required()
-                ->maxLength(20),
-        ]);
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('nip')
+                    ->required()
+                    ->maxLength(50),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('Nama Dosen')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('nip')
-                    ->label('NIP')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('nip')->label('NIP'),
+                Tables\Columns\TextColumn::make('created_at')->dateTime(),
             ])
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    // Hanya tampilkan data dosen miliknya jika role-nya dosen
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if ($user->role === 'dosen') {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query;
     }
 
     public static function getPages(): array

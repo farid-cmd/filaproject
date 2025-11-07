@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class PembimbingLapanganResource extends Resource
 {
@@ -17,6 +18,12 @@ class PembimbingLapanganResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Pembimbing Lapangan';
     protected static ?string $navigationGroup = 'Data Magang';
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+        return $user && $user->role === 'pembimbing';
+    }
 
     public static function form(Form $form): Form
     {
