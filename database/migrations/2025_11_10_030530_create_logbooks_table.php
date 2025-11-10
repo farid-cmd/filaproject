@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->foreign('mahasiswa_nim')
                 ->references('nim')
-                ->on('mahasiswa')
+                ->on('mahasiswas')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 

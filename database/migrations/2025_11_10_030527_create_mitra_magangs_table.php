@@ -16,15 +16,15 @@ return new class extends Migration
             $table->string('kontak')->nullable();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->timestamps();
-            // ...existing code...
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('mitra_magangs');
         Schema::dropIfExists('mitra_magangs');
     }
 };
